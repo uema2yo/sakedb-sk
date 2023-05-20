@@ -5,7 +5,7 @@
   let password = ''
   
   async function register() {
-      await createUser(email, password)
+    await createUser(email, password)
   }
 </script>
   

@@ -1,7 +1,12 @@
-import admin from "firebase-admin";
-import serviceAccount from "../sake-db-firebase-adminsdk.json";
+import * as admin from 'firebase-admin';
+import serviceAccount from "../sake-db-firebase-adminsdk.json" assert { type: 'json' };
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://sake-db.firebaseio.com"
-});
+let isInitialized = false;
+
+if (!isInitialized) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+    databaseURL: "https://sake-db.firebaseio.com"
+  });
+  isInitialized = true;
+}

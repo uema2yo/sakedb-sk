@@ -1,20 +1,22 @@
 <script>
   import { onMount } from "svelte";
-  // @ts-ignore
   import { auth } from "$lib/firebase/init";
-  // @ts-ignore
-  import { user } from "$lib/sveltefirefire";
+  import { user } from "$lib/sveltefire";
+  import { goto } from '$app/navigation';
+
+  let currentPath;
 
   onMount(() => {
-    // @ts-ignore
+    $page.subscribe((value) => {
+      currentPath = value.path;
+    });
+
     const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       user.set(firebaseUser);
     });
-
     return () => {
       unsubscribe();
     };
   });
-</script>
 
-<slot />
+</script>
