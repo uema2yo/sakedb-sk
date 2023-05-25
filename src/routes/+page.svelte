@@ -1,11 +1,19 @@
 <script>
-  import Login from "$components/Forms/Login.svelte";
-  import Logout from "$components/Forms/Logout.svelte";
   import { user } from "$lib/sveltefire";
   import { auth } from '$lib/firebase/init';
   import { SITE_TITLE, SUB_TITLE } from "../constants";
+  import { onMount } from "svelte";
   import Head from "../components/Head.svelte";
-  // 他の必要なインポートをここに追加します。
+  import Login from "$components/Forms/Login.svelte";
+  import Logout from "$components/Forms/Logout.svelte";
+  import Loading from "$components/Loading.svelte";
+
+  let loading = true;
+
+  onMount(() => {
+    loading = false;
+  });
+
   auth.onAuthStateChanged((firebaseUser) => {
     if (firebaseUser) {
     }
@@ -21,9 +29,11 @@
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 
 {#if $user}
-<Logout />
+  <Logout />
+{:else if loading}
+  <Loading />
 {:else}
-<Login />
+  <Login />
 {/if}
 
 <style>
