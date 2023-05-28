@@ -1,27 +1,28 @@
+import { env } from "$env/dynamic/public";
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  databaseURL: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-  measurementId: string;
+	apiKey: string;
+	authDomain: string;
+	databaseURL: string;
+	projectId: string;
+	storageBucket: string;
+	messagingSenderId: string;
+	appId: string;
+	measurementId: string;
 }
 
 const firebaseConfig: FirebaseConfig = {
-  apiKey: "AIzaSyC1REqEI0C1T5ioNavnSiKDI0NI_0p9Ywo",
-  authDomain: "sake-db.firebaseapp.com",
-  databaseURL: "https://sake-db.firebaseio.com",
-  projectId: "sake-db",
-  storageBucket: "sake-db.appspot.com",
-  messagingSenderId: "640593644978",
-  appId: "1:640593644978:web:cd2ad357719f6207eba8ab",
-  measurementId: "G-EKS8CDL35L"
+	apiKey: env.PUBLIC_FIREBASE_API_KEY,
+	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+	databaseURL: env.PUBLIC_FIREBASE_DATABASE_URL,
+	projectId: env.PUBLIC_FIREBASE_PROJECT_ID,
+	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+	appId: env.PUBLIC_FIREBASE_APP_ID,
+	measurementId: env.PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
