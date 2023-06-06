@@ -5,6 +5,7 @@ import { auth, db } from '$lib/firebase/init';
 import { doc, setDoc } from 'firebase/firestore';
 
 export async function createUser(
+	id: string,
 	email: string,
 	password: string
 ): Promise<{ status: number; body: { message: string } }> {
@@ -22,6 +23,11 @@ export async function createUser(
 			await sendEmailVerification(user, actionCodeSettings);
 			await setDoc(doc(db, "m_user", user.uid), {
 				uid: user.uid,
+				timestamp: timestamp
+			});
+			await setDoc(doc(db, 'b_user_id', user.uid), {
+				uid: user.uid,
+				id: id,
 				timestamp: timestamp
 			});
 			await setDoc(doc(db, 'b_user_email', user.uid), {

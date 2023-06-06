@@ -34,9 +34,7 @@
 			return;
 		}
 		const redirectPath = currentPath === "/login" ? "/mypage" : currentPath;
-		if (redirectPath !== currentPath) {
-		  goto(redirectPath);
-		}
+		goto(redirectPath);
 	};
 
 	$: handleRedirect($isLoggedIn, $page.url.pathname);
