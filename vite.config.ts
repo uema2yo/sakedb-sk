@@ -8,7 +8,9 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			"$components": "/src/components"
+			"$src": "/src",
+			"$components": "/src/components",
+			"$styles": "/src/styles"
 		},
 	},
 });

@@ -5,6 +5,7 @@
 	import Logout from "$components/Forms/Logout.svelte";
 	import Loading from "$components/Loading.svelte";
 	import UserProfile from "$components/UserProfile.svelte";
+	import "$styles/common.scss";
 
 	let loading = true;
 
@@ -19,7 +20,7 @@
 </script>
 
 <main>
-	<h1>マイページ</h1>
+	<h1 class="myClass">マイページ</h1>
 	{#if login.user}
 		<Logout />
 		<UserProfile login={login} />
@@ -29,3 +30,10 @@
 		<Login />
 	{/if}
 </main>
+
+<style>
+  :global(.myClass) {
+    color: red;
+  }
+</style>
+

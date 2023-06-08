@@ -2,6 +2,8 @@
 	import { createEventDispatcher, afterUpdate } from "svelte";
 
 	export let fields = [];
+	export let isUserLoggedIn = false;
+	export let isPublic = false;
 
 	let isEditing = false;
 	let editedFields = JSON.parse(JSON.stringify(fields));
@@ -33,7 +35,7 @@
 	}
 </script>
 
-{#if isEditing}
+{#if isEditing && isUserLoggedIn}
 	<form on:submit|preventDefault={saveFields}>
 		{#each fields as field, i}
 			{#if field.type === "select"}
@@ -90,30 +92,35 @@
 		<button type="submit">保存</button>
 		<button type="button" on:click={cancelEdit}>キャンセル</button>
 	</form>
-{:else}
+{:else if isUserLoggedIn}
 	<button
 		type="button"
-		class="slot"
+		class="slot is-editable"
 		tabindex="0"
 		on:click={startEditing}
 		on:keydown={(e) => e.key === "Enter" && startEditing()}
 	>
 		<slot />
 	</button>
+{:else if isPublic}
+	<div class="slot">
+		<slot />
+	</div>
 {/if}
 
 <style>
 	.slot {
-    display: flex;
-    justify-content: space-between;
-    min-width: 320px;
-    appearance: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    &::after {
-      content: "編集";
-
-    }
+		display: flex;
+		justify-content: space-between;
+		min-width: 320px;
+		appearance: none;
+		background: none;
+		border: none;
+		&.is-editable {
+			cursor: pointer;
+			&::after {
+				content: "編集";
+			}
+		}
 	}
 </style>

@@ -44,8 +44,8 @@
 			<h2>{currentUserProfile.name}（{currentUserProfile.id}）さんのプロフィール</h2>
 			<section>
 				<h3>名前</h3>
-				<EditableFields fields={nameFields} on:save={handleSave}>
-					{currentUserProfile.name}
+				<EditableFields fields={nameFields} isPublic isUserLoggedIn on:save={handleSave}>
+					<span>公開</span>{currentUserProfile.name}
 				</EditableFields>
 			</section>
 		</article>
