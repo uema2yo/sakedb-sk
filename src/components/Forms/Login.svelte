@@ -1,6 +1,11 @@
 <script lang="ts">
-	import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
-	import { auth } from "$lib/firebase/init";
+	import {
+		onAuthStateChanged,
+		setPersistence,
+		signInWithEmailAndPassword,
+		browserSessionPersistence,
+		getAuth
+	} from "firebase/auth";
 	import { page } from "$app/stores";
 	import { goto } from "$app/navigation";
 	import { writable } from "svelte/store";
@@ -8,6 +13,7 @@
 	let email = "";
 	let password = "";
 
+	const auth = getAuth();
 	const isLoggedIn = writable(false);
 	const redirectPath = $page.url.pathname === "/login" ? "/mypage" : $page.url.pathname;
 
@@ -22,6 +28,7 @@
 	const login = async () => {
 		event.preventDefault();
 		try {
+			await setPersistence(auth, browserSessionPersistence);
 			await signInWithEmailAndPassword(auth, email, password);
 			goto(redirectPath);
 		} catch (error) {

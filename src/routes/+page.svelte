@@ -7,19 +7,13 @@
   import Login from "$components/Forms/Login.svelte";
   import Logout from "$components/Forms/Logout.svelte";
   import Loading from "$components/Loading.svelte";
-	import { checkLogin, loginInfo } from "$lib/checkLogin";
+	import { checkLogin, login } from "$lib/checkLogin";
 
-	let login = false;
-	let name;
-	let admin = false;
 	let loading = true;
 
 	onMount(async () => {
 		try {
       await checkLogin();
-			login = loginInfo.login;
-			name = loginInfo.name;
-			admin = loginInfo.admin;
 			loading = false;
 		} catch (error) {
 			console.error("Failed to check login:", error);
@@ -40,7 +34,7 @@
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 
-{#if $user}
+{#if login.user}
   <Logout />
 {:else if loading}
   <Loading />
