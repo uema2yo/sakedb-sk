@@ -1,12 +1,12 @@
 <script>
 	import { createEventDispatcher, afterUpdate } from "svelte";
 
-	export let fields = [];
+	export let field = {};
 	export let isUserLoggedIn = false;
 	export let isPublic = false;
 
 	let isEditing = false;
-	let editedFields = JSON.parse(JSON.stringify(fields));
+	let editedFields = JSON.parse(JSON.stringify(field.fields));
 	let inputElements = [];
 
 	const dispatch = createEventDispatcher();
@@ -18,13 +18,13 @@
 	}
 
 	function saveFields() {
-		fields = JSON.parse(JSON.stringify(editedFields));
+		field.fields = JSON.parse(JSON.stringify(editedFields));
 		isEditing = false;
-		dispatch("save", { fields });
+		dispatch("save", { field });
 	}
 
 	function cancelEdit() {
-		editedFields = JSON.parse(JSON.stringify(fields));
+		editedFields = JSON.parse(JSON.stringify(field.fields));
 		isEditing = false;
 	}
 
@@ -37,8 +37,8 @@
 
 {#if isEditing && isUserLoggedIn}
 	<form on:submit|preventDefault={saveFields}>
-		{#each fields as field, i}
-			{#if field.type === "select"}
+		{#each field.fields as fieldData, i}
+			{#if fieldData.type === "select"}
 				<select
 					id="editable-input-{i}"
 					bind:this={inputElements[i]}
@@ -46,11 +46,11 @@
 					on:blur={saveFields}
 					on:keydown={(e) => e.key === "Enter" && saveFields()}
 				>
-					{#each field.options as option}
+					{#each fieldData.options as option}
 						<option value={option}>{option}</option>
 					{/each}
 				</select>
-			{:else if field.type === "checkbox"}
+			{:else if fieldData.type === "checkbox"}
 				<input
 					type="checkbox"
 					id="editable-input-{i}"
@@ -63,8 +63,8 @@
 				{#if editedFields[i].label}
 					<label for="editable-input-{i}">{editedFields[i].label}</label>
 				{/if}
-			{:else if field.type === "radio"}
-				{#each field.options as option, j}
+			{:else if fieldData.type === "radio"}
+				{#each fieldData.options as option, j}
 					<label>
 						<input
 							type="radio"

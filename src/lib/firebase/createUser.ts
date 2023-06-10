@@ -1,8 +1,8 @@
-import { SITE_URL } from '../../constants';
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-import type { ActionCodeSettings } from 'firebase/auth';
-import { auth, db } from '$lib/firebase/init';
-import { doc, setDoc } from 'firebase/firestore';
+import { SITE_URL } from "../../constants";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import type { ActionCodeSettings } from "firebase/auth";
+import { auth, db } from "$lib/firebase/init";
+import { collection, addDoc } from "firebase/firestore";
 
 export async function createUser(
 	id: string,
@@ -21,21 +21,21 @@ export async function createUser(
 				handleCodeInApp: false
 			};
 			await sendEmailVerification(user, actionCodeSettings);
-			await setDoc(doc(db, "m_user", user.uid), {
+			await addDoc(collection(db, "m_user"), {
 				uid: user.uid,
 				timestamp: timestamp
 			});
-			await setDoc(doc(db, 'b_user_id', user.uid), {
+			await addDoc(collection(db, "b_user_id", user.uid), {
 				uid: user.uid,
 				id: id,
 				timestamp: timestamp
 			});
-			await setDoc(doc(db, 'b_user_email', user.uid), {
+			await addDoc(collection(db, "b_user_email", user.uid), {
 				uid: user.uid,
 				email: email,
 				timestamp: timestamp
 			});
-			await setDoc(doc(db, 'b_user_status', user.uid), {
+			await addDoc(collection(db, "b_user_status", user.uid), {
 				uid: user.uid,
 				status: 1,
 				timestamp: timestamp
@@ -44,7 +44,7 @@ export async function createUser(
 		return {
 			status: 200,
 			body: {
-				message: 'Signup successful'
+				message: "Signup successful"
 			}
 		};
 	} catch (error: unknown) {
@@ -59,7 +59,7 @@ export async function createUser(
 			return {
 				status: 500,
 				body: {
-					message: 'An unknown error occurred'
+					message: "An unknown error occurred"
 				}
 			};
 		}

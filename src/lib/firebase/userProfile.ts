@@ -1,7 +1,8 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import type { Unsubscribe } from "firebase/auth";
-import { collection, query, where, orderBy, limit, getDocs, addDoc } from "firebase/firestore";
+import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "$lib/firebase/init";
+import { setDocument } from "$lib/firebase/addDocument";
 
 interface Profile {
 	id?: string;
@@ -10,14 +11,11 @@ interface Profile {
 
 export const profile: Profile = {};
 
-export async function saveUserProfile(userId: string, profile: []) {
-	const userCollection = collection(db, `users/${userId}/profiles`);
-
-	try {
-		await addDoc(userCollection, { ...profile, timestamp: new Date() });
-	} catch (e) {
-		console.error("Error saving user profile: ", e);
-	}
+export async function setUserProfileItem(
+	collection_name: string,
+	document: Record<string, unknown>
+) {
+	setDocument(collection_name, document);
 }
 
 export function getUserProfile(): Promise<void> {
@@ -58,8 +56,6 @@ export function getUserProfile(): Promise<void> {
 
 				profile.id = docs[0] ? docs[0].data().id : null;
 				profile.name = docs[1] ? docs[1].data().email : null;
-
-				console.log("profile", profile);
 
 				unsubscribe();
 				resolve();
