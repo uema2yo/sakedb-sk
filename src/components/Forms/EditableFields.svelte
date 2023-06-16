@@ -5,35 +5,79 @@
 	export let isUserLoggedIn = false;
 	export let isPublic = false;
 
-	let isEditing = false;
-	let editedFields = JSON.parse(JSON.stringify(field.fields));
-	let inputElements = [];
-
 	const dispatch = createEventDispatcher();
+	let isEditing = false;
+	let isCompositionInProgress = false;
+	let editedFields = JSON.parse(JSON.stringify(field.fields));
+	let isPageLoad = true;
+	let value;
+	let inputElements = [];
 
 	function startEditing() {
 		console.log("start editing");
 		isEditing = true;
-		focusFirstInput();
+		isCompositionInProgress = false;
+		inputElements = field.fields.map(() => ({}));
+		field.fields.forEach((fieldData, i) => {
+			if (fieldData.type === "radio") {
+				inputElements[i] = fieldData.options.map(() => ({}));
+			}
+		});
 	}
-
 	function saveFields() {
+		if (isCompositionInProgress) return;
 		field.fields = JSON.parse(JSON.stringify(editedFields));
 		isEditing = false;
 		dispatch("save", { field });
+		resetInputElements();
 	}
 
 	function cancelEdit() {
+		console.log("cansel", field.fields);
 		editedFields = JSON.parse(JSON.stringify(field.fields));
+		console.log("editedFields", editedFields, inputElements);
 		isEditing = false;
+		resetInputElements();
 	}
 
 	function focusFirstInput() {
-		afterUpdate(() => {
-			inputElements[0].focus();
-		});
+		if (inputElements.length > 0) {
+			inputElements.forEach((element) => {
+				if (
+					element &&
+					element.name !== "public" &&
+					!element.disabled &&
+					(element.type === "text") | "checkbox"
+				) {
+					element.focus();
+				}
+			});
+		}
 	}
+
+	function handleCompositionStart() {
+		isCompositionInProgress = true;
+	}
+
+	function handleCompositionEnd() {
+		isCompositionInProgress = false;
+	}
+
+	function resetInputElements() {
+		inputElements = [];
+	}
+
+	document.addEventListener("compositionstart", handleCompositionStart);
+	document.addEventListener("compositionend", handleCompositionEnd);
+
+	afterUpdate(() => {
+		if (isEditing) {
+			focusFirstInput();
+		}
+	});
 </script>
+
+<!-- 省略 -->
 
 {#if isEditing && isUserLoggedIn}
 	<form on:submit|preventDefault={saveFields}>
@@ -43,11 +87,9 @@
 					id="editable-input-{i}"
 					bind:this={inputElements[i]}
 					bind:value={editedFields[i].value}
-					on:blur={saveFields}
-					on:keydown={(e) => e.key === "Enter" && saveFields()}
 				>
 					{#each fieldData.options as option}
-						<option value={option}>{option}</option>
+						<option value={option.value}>{option.innerText}</option>
 					{/each}
 				</select>
 			{:else if fieldData.type === "checkbox"}
@@ -57,8 +99,6 @@
 					disabled={editedFields[i].disabled}
 					bind:this={inputElements[i]}
 					bind:checked={editedFields[i].value}
-					on:blur={saveFields}
-					on:keydown={(e) => e.key === "Enter" && saveFields()}
 				/>
 				{#if editedFields[i].label}
 					<label for="editable-input-{i}">{editedFields[i].label}</label>
@@ -70,11 +110,11 @@
 							type="radio"
 							name="editable-input-{i}"
 							id="editable-input-{i}-{j}"
-							bind:this={inputElements[i][j]}
+							bind:this={inputElements[`${i}-${j}`]}
 							bind:group={editedFields[i].value}
-							value={option}
+							value={option.value}
 						/>
-						<span>{option}</span>
+						<span>{option.label}</span>
 					</label>
 				{/each}
 			{:else}
@@ -83,9 +123,7 @@
 					id="editable-input-{i}"
 					bind:this={inputElements[i]}
 					bind:value={editedFields[i].value}
-					on:blur={saveFields}
 					on:keydown={(e) => e.key === "Enter" && saveFields()}
-					autofocus={i === 0}
 				/>
 			{/if}
 		{/each}
@@ -116,11 +154,13 @@
 		appearance: none;
 		background: none;
 		border: none;
-		&.is-editable {
-			cursor: pointer;
-			&::after {
-				content: "編集";
-			}
-		}
+	}
+
+	.slot.is-editable {
+		cursor: pointer;
+	}
+
+	.slot.is-editable::after {
+		content: "編集";
 	}
 </style>

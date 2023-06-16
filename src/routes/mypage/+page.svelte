@@ -4,7 +4,7 @@
 	import Login from "$components/Forms/Login.svelte";
 	import Logout from "$components/Forms/Logout.svelte";
 	import Loading from "$components/Loading.svelte";
-	import UserProfile from "$components/UserProfile.svelte";
+	import Profile from "./Profile.svelte";
 	import "$styles/common.scss";
 
 	let loading = true;
@@ -23,7 +23,7 @@
 	<h1 class="myClass">マイページ</h1>
 	{#if login.user}
 		<Logout />
-		<UserProfile login={login} />
+		<Profile uid={login.uid} />
 	{:else if loading}
 		<Loading />
 	{:else}

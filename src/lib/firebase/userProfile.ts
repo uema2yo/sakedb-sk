@@ -2,11 +2,13 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import type { Unsubscribe } from "firebase/auth";
 import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "$lib/firebase/init";
-import { setDocument } from "$lib/firebase/addDocument";
+import { addDocument } from "$lib/firebase/addDocument";
 
 interface Profile {
 	id?: string;
 	name?: string;
+	public?: boolean;
+	timestamp?: number;
 }
 
 export const profile: Profile = {};
@@ -15,7 +17,7 @@ export async function setUserProfileItem(
 	collection_name: string,
 	document: Record<string, unknown>
 ) {
-	setDocument(collection_name, document);
+	addDocument(collection_name, document);
 }
 
 export function getUserProfile(): Promise<void> {
@@ -53,10 +55,10 @@ export function getUserProfile(): Promise<void> {
 						}
 					})
 				);
-
-				profile.id = docs[0] ? docs[0].data().id : null;
-				profile.name = docs[1] ? docs[1].data().email : null;
-
+				if (docs) {
+					profile.id = docs[0]?.data().id || null;
+					profile.name = docs[1]?.data().name || "名無し";
+				}
 				unsubscribe();
 				resolve();
 			} catch (error) {

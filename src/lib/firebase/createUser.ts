@@ -28,6 +28,7 @@ export async function createUser(
 			await addDoc(collection(db, "b_user_id", user.uid), {
 				uid: user.uid,
 				id: id,
+				public: true,
 				timestamp: timestamp
 			});
 			await addDoc(collection(db, "b_user_email", user.uid), {
