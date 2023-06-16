@@ -33,9 +33,7 @@
 	}
 
 	function cancelEdit() {
-		console.log("cansel", field.fields);
 		editedFields = JSON.parse(JSON.stringify(field.fields));
-		console.log("editedFields", editedFields, inputElements);
 		isEditing = false;
 		resetInputElements();
 	}

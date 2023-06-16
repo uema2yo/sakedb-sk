@@ -105,7 +105,7 @@
 				]
 			};
 		} catch (error) {
-			console.error("An error occurred while checking the login status:", error);
+			console.error("ログイン状態の確認中にエラーが発生しました。", error);
 		}
 	});
 
@@ -152,8 +152,8 @@
 			<section>
 				<h3>性自認</h3>
 				<EditableFields field={genderField} isPublic isUserLoggedIn on:save={handleSave}>
-					<span>{currentUserProfile.gender.public ? "公開" : "非公開"}</span>{currentUserProfile.gender
-						.value}
+					<span>{currentUserProfile.gender.public ? "公開" : "非公開"}</span>{currentUserProfile
+						.gender.value}
 				</EditableFields>
 			</section>
 		</article>
