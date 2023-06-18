@@ -73,6 +73,7 @@
 			focusFirstInput();
 		}
 	});
+	
 </script>
 
 <!-- 省略 -->
@@ -85,6 +86,7 @@
 					id="editable-input-{i}"
 					bind:this={inputElements[i]}
 					bind:value={editedFields[i].value}
+					on:change={fieldData.onchange}
 				>
 					{#each fieldData.options as option}
 						<option value={option.value}>{option.innerText}</option>
