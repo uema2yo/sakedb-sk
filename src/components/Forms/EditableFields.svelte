@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { createEventDispatcher, afterUpdate } from "svelte";
 
 	export let field = {};
@@ -27,6 +27,11 @@
 	function saveFields() {
 		if (isCompositionInProgress) return;
 		field.fields = JSON.parse(JSON.stringify(editedFields));
+		field.fields.find((obj) => {
+			if(obj.type === "date") {
+				obj.value = new Date(obj.value).getTime();
+			}
+		});
 		isEditing = false;
 		dispatch("save", { field });
 		resetInputElements();
@@ -73,7 +78,6 @@
 			focusFirstInput();
 		}
 	});
-	
 </script>
 
 <!-- 省略 -->
@@ -84,9 +88,13 @@
 			{#if fieldData.type === "select"}
 				<select
 					id="editable-input-{i}"
+					name={fieldData.selectName}
 					bind:this={inputElements[i]}
 					bind:value={editedFields[i].value}
-					on:change={fieldData.onchange}
+					on:change={() =>
+						fieldData.onchange({
+							target: { name: fieldData.selectName, value: inputElements[i].value }
+						})}
 				>
 					{#each fieldData.options as option}
 						<option value={option.value}>{option.innerText}</option>
@@ -117,6 +125,14 @@
 						<span>{option.label}</span>
 					</label>
 				{/each}
+			{:else if fieldData.type === "date"}
+				<input
+					type="date"
+					id="editable-input-{i}"
+					bind:this={inputElements[i]}
+					bind:value={editedFields[i].value}
+					on:keydown={(e) => e.key === "Enter" && saveFields()}
+				/>
 			{:else}
 				<input
 					type="text"
