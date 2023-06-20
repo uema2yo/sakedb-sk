@@ -14,10 +14,10 @@ interface Profile {
 export const profile: Profile = {};
 
 export async function setUserProfileItem(
-	collection_name: string,
+	collectionName: string,
 	document: Record<string, unknown>
 ) {
-	addDocument(collection_name, document);
+	addDocument(collectionName, document);
 }
 
 export function getUserProfile(): Promise<void> {

@@ -10,7 +10,7 @@ export function getDateOffset(unit: string, offset: number) {
 		days: new Date(currentYear, currentMonth, currentDay - offset)
 	};
 
-  return getFormatedDate(offsetLogic[unit]);
+  return offsetLogic[unit];
 }
 
 export function getFormatedDate(timestamp: number, style = "hyphen") {

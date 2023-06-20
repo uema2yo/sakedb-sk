@@ -80,53 +80,55 @@
 				"ja"
 			);
 
+			const { id, name, gender, birthdate } = currentUserProfile;
+
 			loading = false;
 
 			idField = {
 				id: "id",
-				collection_name: "b_user_id",
+				collectionName: "b_user_id",
 				fields: [
 					{
 						name: "public",
 						type: "checkbox",
-						value: currentUserProfile.id.public,
+						value: id.public,
 						disabled: true,
 						label: "公開"
 					},
-					{ name: "value", type: "text", value: currentUserProfile.id.value }
+					{ name: "value", type: "text", value: id.value }
 				]
 			};
 
 			nameField = {
 				id: "name",
-				collection_name: "b_user_name",
+				collectionName: "b_user_name",
 				fields: [
 					{
 						name: "public",
 						type: "checkbox",
-						value: currentUserProfile.name.public,
+						value: name.public,
 						disabled: true,
 						label: "公開"
 					},
-					{ name: "value", type: "text", value: currentUserProfile.name.value }
+					{ name: "value", type: "text", value: name.value }
 				]
 			};
 
 			genderField = {
 				id: "gender",
-				collection_name: "b_user_gender",
+				collectionName: "b_user_gender",
 				fields: [
 					{
 						name: "public",
 						type: "checkbox",
-						value: currentUserProfile.gender.public,
+						value: gender.public,
 						disabled: false,
 						label: "公開"
 					},
 					{
 						name: "value",
 						type: "radio",
-						value: currentUserProfile.gender.value,
+						value: gender.value,
 						group_name: "profile-gender",
 						options: genderOptions
 					}
@@ -134,20 +136,19 @@
 			};
 			birthdateField = {
 				id: "birthdate",
-				collection_name: "b_user_birthdate",
+				collectionName: "b_user_birthdate",
 				fields: [
 					{
 						name: "public",
 						type: "checkbox",
-						value: currentUserProfile.birthdate.public,
+						value: birthdate.public,
 						disabled: false,
 						label: "公開"
 					},
 					{
 						name: "value",
 						type: "date",
-						value: getFormatedDate(currentUserProfile.birthdate.value),
-						default: getDateOffset("years", 40)
+						value: birthdate.value ? getFormatedDate(birthdate.value):getFormatedDate(getDateOffset("years", 40))
 					}
 				]
 			};
@@ -161,10 +162,10 @@
 		saving = true;
 		let document = {};
 		ev.detail.field.fields.forEach((field) => {
-			const {name, value} = field;
+			const { name, value } = field;
 			document[name] = value;
 		});
-		addDocument(ev.detail.field.collection_name, document)
+		addDocument(ev.detail.field.collectionName, document)
 			.then(() => {
 				currentUserProfile[ev.detail.field.id] = document;
 				if (ev.detail.field.id === "gender") {

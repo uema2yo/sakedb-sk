@@ -3,7 +3,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { checkLogin, login } from "$lib/checkLogin";
 
 export async function addDocument(
-	collection_name: string,
+	collectionName: string,
 	document: Record<string, unknown>
 ) {
 	try {
@@ -12,7 +12,7 @@ export async function addDocument(
 		const timestamp = new Date().getTime();
 		document["timestamp"] = timestamp;
 		document["uid"] = uid;
-		await addDoc(collection(db, collection_name), document);
+		await addDoc(collection(db, collectionName), document);
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			return {
