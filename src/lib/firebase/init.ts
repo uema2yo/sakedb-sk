@@ -21,6 +21,7 @@ interface FirebaseConfig {
 	messagingSenderId: string;
 	appId: string;
 	measurementId: string;
+	authEmulatorHost: string;
 }
 
 const firebaseConfig: FirebaseConfig = {
@@ -31,7 +32,8 @@ const firebaseConfig: FirebaseConfig = {
 	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET,
 	messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 	appId: env.PUBLIC_FIREBASE_APP_ID,
-	measurementId: env.PUBLIC_FIREBASE_MEASUREMENT_ID
+	measurementId: env.PUBLIC_FIREBASE_MEASUREMENT_ID,
+	authEmulatorHost: env.PUBLIC_LOCAL === "TRUE" ? "localhost:9099" : ""
 };
 
 const app = initializeApp(firebaseConfig);
@@ -46,5 +48,5 @@ export const db = initializeFirestore(app, {
 
 if (env.PUBLIC_LOCAL === "TRUE") {
 	connectFirestoreEmulator(db, "127.0.0.1", 9999);
-	connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+	connectAuthEmulator(auth, "http://localhost:9099");
 }

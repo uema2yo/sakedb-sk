@@ -2,7 +2,7 @@ import { SITE_URL } from "../../constants";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import type { ActionCodeSettings } from "firebase/auth";
 import { auth, db } from "$lib/firebase/init";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 
 export async function createUser(
 	id: string,
@@ -21,7 +21,8 @@ export async function createUser(
 				handleCodeInApp: false
 			};
 			await sendEmailVerification(user, actionCodeSettings);
-			await addDoc(collection(db, "m_user"), {
+			await setDoc(doc(db, "m_user", user.uid), {
+				//uid を一致させるために m_user は setDoc を使う。
 				uid: user.uid,
 				timestamp: timestamp
 			});

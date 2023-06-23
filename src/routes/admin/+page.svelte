@@ -6,8 +6,8 @@
 	import { getDocuments } from "$lib/firebase/getDocuments";
 	import { checkLogin, login } from "$lib/checkLogin";
 	import { SITE_TITLE, SUB_TITLE } from "../../constants";
-	import { updatePrefectureCodes } from "$lib/api/updatePrefectureCodes";
-	import { updateCityCodes } from "$lib/api/updateCityCodes";
+	import { updatePrefectureCodes } from "$lib/code/updatePrefectureCodes";
+	import { updateCityCodes } from "$lib/code/updateCityCodes";
 	import Head from "$components/Head.svelte";
 	import Login from "$components/Forms/Login.svelte";
 	import Logout from "$components/Forms/Logout.svelte";

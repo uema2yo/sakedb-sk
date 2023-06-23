@@ -26,16 +26,18 @@
 		}
 	});
 
-	const login = async () => {
+	const login = () => {
 		event.preventDefault();
-		try {
-			await setPersistence(auth, browserSessionPersistence);
-			await signInWithEmailAndPassword(auth, email, password)
-			//await addDocument("m_user_status", {value: 1});
-			goto(redirectPath);
-		} catch (error) {
-			console.error("Error signing in", error);
-		}
+		setPersistence(auth, browserSessionPersistence)
+			.then(() => {
+				return signInWithEmailAndPassword(auth, email, password);
+			})
+			.then(() => {
+				goto(redirectPath);
+			})
+			.catch((error) => {
+				console.error("Error signing in", error);
+			});
 	};
 
 	const handleRedirect = (isLoggedIn, currentPath) => {
