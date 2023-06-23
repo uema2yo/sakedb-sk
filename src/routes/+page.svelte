@@ -14,6 +14,7 @@
 	onMount(async () => {
 		try {
       await checkLogin();
+      console.log(login)
 			loading = false;
 		} catch (error) {
 			console.error("Failed to check login:", error);

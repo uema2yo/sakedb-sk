@@ -28,7 +28,7 @@ interface CollectionConfig {
     field: string;
     direction: OrderByDirection;
   };
-  limit_num?: number;
+  limit_num?: number | null;
 }
 
 export async function getDocuments(

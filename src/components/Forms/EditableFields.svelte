@@ -91,10 +91,10 @@
 					name={fieldData.selectName}
 					bind:this={inputElements[i]}
 					bind:value={editedFields[i].value}
-					on:change={() =>
+					on:change={fieldData.onchange ? () =>
 						fieldData.onchange({
 							target: { name: fieldData.selectName, value: inputElements[i].value }
-						})}
+						}) : null}
 				>
 					{#each fieldData.options as option}
 						<option value={option.value}>{option.innerText}</option>

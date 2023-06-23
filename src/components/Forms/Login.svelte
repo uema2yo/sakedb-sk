@@ -9,6 +9,7 @@
 	import { page } from "$app/stores";
 	import { goto } from "$app/navigation";
 	import { writable } from "svelte/store";
+	import { addDocument } from "$lib/firebase/addDocument";
 
 	let email = "";
 	let password = "";
@@ -29,7 +30,8 @@
 		event.preventDefault();
 		try {
 			await setPersistence(auth, browserSessionPersistence);
-			await signInWithEmailAndPassword(auth, email, password);
+			await signInWithEmailAndPassword(auth, email, password)
+			//await addDocument("m_user_status", {value: 1});
 			goto(redirectPath);
 		} catch (error) {
 			console.error("Error signing in", error);

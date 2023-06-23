@@ -1,6 +1,6 @@
 import { env } from "$env/dynamic/public";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { initializeFirestore, CACHE_SIZE_UNLIMITED } from "firebase/firestore";
 
 interface FirebaseConfig {
@@ -27,6 +27,8 @@ const firebaseConfig: FirebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+
+setPersistence(auth, browserLocalPersistence);
 
 export const db = initializeFirestore(app, {
   cacheSizeBytes: CACHE_SIZE_UNLIMITED,

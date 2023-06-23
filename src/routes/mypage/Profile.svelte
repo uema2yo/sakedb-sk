@@ -15,11 +15,13 @@
 		id: { public: true, value: "" },
 		name: { public: true, value: "" },
 		gender: { public: false, value: 0 },
-		birthdate: { public: false, value: "", yyyymmdd: "" }
+		birthdate: { public: false, value: "", format: "" },
+		residencePrefecture: { public: false, value: 0 }
 	};
-	let idField, nameField, genderField, birthdateField;
+	let idField, nameField, genderField, birthdateField, residencePrefectureField;
 	let saving = false;
 	let genderOptions = [];
+	let prefectureOptions = [];
 
 	onMount(async () => {
 		try {
@@ -27,63 +29,20 @@
 			genders.map((gender) => {
 				genderOptions.push({ value: gender.code, label: gender.label });
 			});
-
-			const documents = await getDocuments([
+			const prefectures = await getDocuments([
 				{
-					name: "b_user_id",
-					conditions: [{ name: "uid", operator: "==", value: uid }],
-					public_only: false,
-					order_by: { field: "timestamp", direction: "desc" },
-					limit_num: 1
-				},
-				{
-					name: "b_user_name",
-					conditions: [{ name: "uid", operator: "==", value: uid }],
-					public_only: false,
-					order_by: { field: "timestamp", direction: "desc" },
-					limit_num: 1
-				},
-				{
-					name: "b_user_gender",
-					conditions: [{ name: "uid", operator: "==", value: uid }],
-					public_only: false,
-					order_by: { field: "timestamp", direction: "desc" },
-					limit_num: 1
-				},
-				{
-					name: "b_user_birthdate",
-					conditions: [{ name: "uid", operator: "==", value: uid }],
-					public_only: false,
-					order_by: { field: "timestamp", direction: "desc" },
-					limit_num: 1
+					name: "b_code_prefecture",
+					order_by: { field: "code", direction: "asc" }
 				}
 			]);
-
-			function getCurrentUserProfile(doc, alt) {
-				return {
-					public: doc ? doc.public : false,
-					value: doc ? doc.value : alt
-				};
-			}
-
-			const userAltName = "user";
-
-			currentUserProfile.id = getCurrentUserProfile(documents[0], userAltName);
-			currentUserProfile.name = getCurrentUserProfile(documents[1], "名無し");
-			currentUserProfile.gender = getCurrentUserProfile(documents[2], 0);
-			currentUserProfile.gender.label = genderOptions.find(
-				(genderOption) => genderOption.value === currentUserProfile.gender.value
-			).label;
-			currentUserProfile.birthdate = getCurrentUserProfile(documents[3], null);
-			currentUserProfile.birthdate.yyyymmdd = getFormatedDate(
-				currentUserProfile.birthdate.value,
-				"ja"
-			);
-
-			const { id, name, gender, birthdate } = currentUserProfile;
-
-			loading = false;
-
+			prefectures.map((prefecture) => {
+				if (prefecture.code === 13) {
+					prefectureOptions.push({ value: 0, innerText: "----" });
+				}
+				prefectureOptions.push({ value: prefecture.code, innerText: prefecture.label });
+			});
+			refreshCurrentUserProfile();
+			const { id, name, gender, birthdate, residencePrefecture } = currentUserProfile;
 			idField = {
 				id: "id",
 				collectionName: "b_user_id",
@@ -148,7 +107,28 @@
 					{
 						name: "value",
 						type: "date",
-						value: birthdate.value ? getFormatedDate(birthdate.value):getFormatedDate(getDateOffset("years", 40))
+						value: birthdate.value
+							? getFormatedDate(birthdate.value)
+							: getFormatedDate(getDateOffset("years", 40))
+					}
+				]
+			};
+			residencePrefectureField = {
+				id: "residence_country",
+				collectionName: "b_user_residence_prefecture",
+				fields: [
+					{
+						name: "public",
+						type: "checkbox",
+						value: residencePrefecture.public,
+						disabled: false,
+						label: "公開"
+					},
+					{
+						name: "value",
+						type: "select",
+						value: residencePrefecture.value,
+						options: prefectureOptions
 					}
 				]
 			};
@@ -156,6 +136,69 @@
 			console.error("ログイン状態の確認中にエラーが発生しました。", error);
 		}
 	});
+
+	async function refreshCurrentUserProfile() {
+		const documents = await getDocuments([
+			{
+				name: "b_user_id",
+				conditions: [{ name: "uid", operator: "==", value: uid }],
+				public_only: false,
+				order_by: { field: "timestamp", direction: "desc" },
+				limit_num: 1
+			},
+			{
+				name: "b_user_name",
+				conditions: [{ name: "uid", operator: "==", value: uid }],
+				public_only: false,
+				order_by: { field: "timestamp", direction: "desc" },
+				limit_num: 1
+			},
+			{
+				name: "b_user_gender",
+				conditions: [{ name: "uid", operator: "==", value: uid }],
+				public_only: false,
+				order_by: { field: "timestamp", direction: "desc" },
+				limit_num: 1
+			},
+			{
+				name: "b_user_birthdate",
+				conditions: [{ name: "uid", operator: "==", value: uid }],
+				public_only: false,
+				order_by: { field: "timestamp", direction: "desc" },
+				limit_num: 1
+			},
+			{
+				name: "b_user_residence_prefecture",
+				conditions: [{ name: "uid", operator: "==", value: uid }],
+				public_only: false,
+				order_by: { field: "timestamp", direction: "desc" },
+				limit_num: 1
+			}
+		]);
+
+		function getCurrentUserProfile(doc, alt) {
+			return {
+				public: doc ? doc.public : false,
+				value: doc ? doc.value : alt
+			};
+		}
+
+		const userAltName = "user";
+
+		currentUserProfile.id = getCurrentUserProfile(documents[0], userAltName);
+		currentUserProfile.name = getCurrentUserProfile(documents[1], "名無し");
+		currentUserProfile.gender = getCurrentUserProfile(documents[2], 0);
+		currentUserProfile.birthdate = getCurrentUserProfile(documents[3], null);
+		currentUserProfile.residencePrefecture = getCurrentUserProfile(documents[4], 0);
+		currentUserProfile.gender.format = genderOptions.find(
+			(genderOption) => genderOption.value === currentUserProfile.gender.value
+		).label;
+		currentUserProfile.birthdate.format = getFormatedDate(currentUserProfile.birthdate.value, "ja");
+		currentUserProfile.residencePrefecture.format = prefectureOptions.find(
+			(prefectureOption) => prefectureOption.value === currentUserProfile.residencePrefecture.value
+		).innerText;
+		loading = false;
+	}
 
 	function handleSave(ev) {
 		if (saving) return;
@@ -168,14 +211,8 @@
 		addDocument(ev.detail.field.collectionName, document)
 			.then(() => {
 				currentUserProfile[ev.detail.field.id] = document;
-				if (ev.detail.field.id === "gender") {
-					currentUserProfile.gender.label = genderOptions.find(
-						(genderOption) => genderOption.value === document.value
-					).label;
-				}
-				if (ev.detail.field.id === "birthdate") {
-					currentUserProfile.birthdate.yyyymmdd = getFormatedDate(document.value, "ja");
-				}
+				refreshCurrentUserProfile();
+				//refreshLabel();
 				saving = false;
 			})
 			.catch((error) => {
@@ -191,7 +228,6 @@
 	{:else}
 		<article>
 			<h2>{currentUserProfile.name.value}（{currentUserProfile.id.value}）さんのプロフィール</h2>
-
 			<section>
 				<h3>ユーザーID</h3>
 				<EditableFields field={idField} isPublic isUserLoggedIn on:save={handleSave}>
@@ -210,7 +246,7 @@
 				<h3>性自認</h3>
 				<EditableFields field={genderField} isPublic isUserLoggedIn on:save={handleSave}>
 					<span>{currentUserProfile.gender.public ? "公開" : "非公開"}</span>{currentUserProfile
-						.gender.label}
+						.gender.format}
 				</EditableFields>
 			</section>
 			<section>
@@ -218,8 +254,20 @@
 				<EditableFields field={birthdateField} isPublic isUserLoggedIn on:save={handleSave}>
 					<span>{currentUserProfile.birthdate.public ? "公開" : "非公開"}</span>{currentUserProfile
 						.birthdate.value
-						? currentUserProfile.birthdate.yyyymmdd
+						? currentUserProfile.birthdate.format
 						: "未登録"}
+				</EditableFields>
+			</section>
+			<section>
+				<h3>居住地</h3>
+				<EditableFields
+					field={residencePrefectureField}
+					isPublic
+					isUserLoggedIn
+					on:save={handleSave}
+				>
+					<span>{currentUserProfile.residencePrefecture.public ? "公開" : "非公開"}</span
+					>{currentUserProfile.residencePrefecture.format}
 				</EditableFields>
 			</section>
 		</article>
