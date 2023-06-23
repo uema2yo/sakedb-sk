@@ -1,0 +1,16 @@
+{
+  "emulators": {
+    "singleProjectMode": true,
+    "firestore": {
+      "host": "localhost",
+      "port": 9999
+    },
+    "ui": {
+      "enabled": true,
+      "port": 9000
+    },
+    "auth": {
+      "port": 9099
+    }
+  }
+}

@@ -1,7 +1,16 @@
 import { env } from "$env/dynamic/public";
 import { initializeApp } from "firebase/app";
-import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { initializeFirestore, CACHE_SIZE_UNLIMITED } from "firebase/firestore";
+import {
+	getAuth,
+	setPersistence,
+	browserLocalPersistence,
+	connectAuthEmulator
+} from "firebase/auth";
+import {
+	initializeFirestore,
+	CACHE_SIZE_UNLIMITED,
+	connectFirestoreEmulator
+} from "firebase/firestore";
 
 interface FirebaseConfig {
 	apiKey: string;
@@ -26,10 +35,16 @@ const firebaseConfig: FirebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
 export const auth = getAuth(app);
 
 setPersistence(auth, browserLocalPersistence);
 
 export const db = initializeFirestore(app, {
-  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+	cacheSizeBytes: CACHE_SIZE_UNLIMITED
 });
+
+if (env.PUBLIC_LOCAL === "TRUE") {
+	connectFirestoreEmulator(db, "127.0.0.1", 9999);
+	connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+}

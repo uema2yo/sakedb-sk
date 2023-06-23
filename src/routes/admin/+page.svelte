@@ -6,7 +6,8 @@
 	import { getDocuments } from "$lib/firebase/getDocuments";
 	import { checkLogin, login } from "$lib/checkLogin";
 	import { SITE_TITLE, SUB_TITLE } from "../../constants";
-	import { updatePrefectureCode } from "$lib/api/updatePrefectureCode";
+	import { updatePrefectureCodes } from "$lib/api/updatePrefectureCodes";
+	import { updateCityCodes } from "$lib/api/updateCityCodes";
 	import Head from "$components/Head.svelte";
 	import Login from "$components/Forms/Login.svelte";
 	import Logout from "$components/Forms/Logout.svelte";
@@ -46,7 +47,16 @@
 		}
 	});
 	function apiImportHandler(ev) {
-		updatePrefectureCode()
+		switch(ev.target.name) {
+			case "updatePrefectureCodes":
+				updatePrefectureCodes();
+			break;
+			case "updateCityCodes":
+				updateCityCodes();
+			break;
+			case "openPrefectureCodes":
+			break;
+		}
 	}
 	function openEditorHandler(ev) {}
 </script>
@@ -69,11 +79,19 @@
 
 <article>
 	<h2>都道府県コード</h2>
-	<button type="button" name="updatePrefectureCode" on:click={apiImportHandler}
+	<button type="button" name="updatePrefectureCodes" on:click={apiImportHandler}
 		>RESAS API で上書きする</button
 	>
-	<button type="button" name="openPrefecture" on:click={openEditorHandler}
+	<button type="button" name="openPrefectureCodes" on:click={openEditorHandler}
 		>手動編集画面を開く</button
+	>
+</article>
+<article>
+	<h2>市区町村コード</h2>
+	<button type="button" name="updateCityCodes" on:click={apiImportHandler}
+		>RESAS API で上書きする</button
+	>
+	<button type="button" name="openCityCodes" on:click={openEditorHandler}>手動編集画面を開く</button
 	>
 </article>
 
