@@ -1,7 +1,7 @@
 import { env } from "$env/dynamic/public";
 import { setDocuments } from "$lib/firebase/setDocuments";
 
-export async function updatePrefectureCode() {
+export async function updatePrefectureCodes() {
 	try {
 		const prefecture = await fetch("https://opendata.resas-portal.go.jp/api/v1/prefectures", {
 			headers: {
@@ -9,17 +9,15 @@ export async function updatePrefectureCode() {
 			}
 		});
 
-		const prefectureCode = [];
+		const prefectureCodes = [];
 
 		const res = await prefecture.json();
 
 		res.result.forEach((r) => {
-			prefectureCode.push({ code: r.prefCode, label: r.prefName });
+			prefectureCodes.push({ code: r.prefCode, label: r.prefName });
 		});
 
-		console.log(prefectureCode);
-
-		setDocuments("b_code_prefecture", prefectureCode);
+		setDocuments("b_code_prefecture", prefectureCodes);
 	} catch (error) {
 		console.error("都道府県一覧データ API の読み込みに失敗しました。");
 	}
