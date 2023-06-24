@@ -8,6 +8,7 @@
 	import { getGenderList } from "$lib/code/gender";
 	import { createEventDispatcher, afterUpdate } from "svelte";
 	import { getDateOffset, getFormatedDate } from "$lib/utility/date";
+  import { GENDER_CODES } from '$src/constants';
 
 	export let uid;
 	let loading = true;
@@ -25,8 +26,7 @@
 
 	onMount(async () => {
 		try {
-			const genders = await getGenderList();
-			genders.map((gender) => {
+			GENDER_CODES.map((gender) => {
 				genderOptions.push({ value: gender.code, label: gender.label });
 			});
 			const prefectures = await getDocuments([

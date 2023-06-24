@@ -4,7 +4,7 @@
   import { SITE_TITLE, SUB_TITLE } from "../constants";
   import { onMount } from "svelte";
   import Head from "../components/Head.svelte";
-  import Login from "$components/Forms/Login.svelte";
+  import Register from "$components/Forms/Register.svelte";
   import Logout from "$components/Forms/Logout.svelte";
   import Loading from "$components/Loading.svelte";
 	import { checkLogin, login } from "$lib/checkLogin";
@@ -40,7 +40,7 @@
 {:else if loading}
   <Loading />
 {:else}
-  <Login />
+  <Register />
 {/if}
 
 <style>

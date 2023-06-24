@@ -3,6 +3,7 @@ import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/
 import type { ActionCodeSettings } from "firebase/auth";
 import { auth, db } from "$lib/firebase/init";
 import { collection, addDoc, setDoc, doc } from "firebase/firestore";
+import { addDocument } from "$lib/firebase/addDocument";
 
 export async function createUser(
 	id: string,
@@ -26,18 +27,19 @@ export async function createUser(
 				uid: user.uid,
 				timestamp: timestamp
 			});
-			await addDoc(collection(db, "b_user_id", user.uid), {
+			addDocument("b_user_id", {
 				uid: user.uid,
 				id: id,
 				public: true,
 				timestamp: timestamp
 			});
-			await addDoc(collection(db, "b_user_email", user.uid), {
+			addDocument("b_user_email", {
 				uid: user.uid,
 				email: email,
+				public: false,
 				timestamp: timestamp
 			});
-			await addDoc(collection(db, "b_user_status", user.uid), {
+			addDocument("b_user_status", {
 				uid: user.uid,
 				status: 1,
 				timestamp: timestamp

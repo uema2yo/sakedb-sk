@@ -23,6 +23,8 @@
 			await checkLogin();
 			const uid = login.uid;
 			admin = login.admin;
+
+			console.log(login);
 			const documents = await getDocuments([
 				{
 					name: "b_user_id",
@@ -39,23 +41,23 @@
 					limit_num: 1
 				}
 			]);
-			id = documents[0].value;
-			name = documents[1].value;
+			id = documents[0] && documents[0].value;
+			name = documents[1] && documents[1].value;
 			loading = false;
 		} catch (error) {
 			console.error("Failed to check login:", error);
 		}
 	});
 	function apiImportHandler(ev) {
-		switch(ev.target.name) {
+		switch (ev.target.name) {
 			case "updatePrefectureCodes":
 				updatePrefectureCodes();
-			break;
+				break;
 			case "updateCityCodes":
 				updateCityCodes();
-			break;
+				break;
 			case "openPrefectureCodes":
-			break;
+				break;
 		}
 	}
 	function openEditorHandler(ev) {}
@@ -66,34 +68,39 @@
 	<title>管理画面 - {SITE_TITLE}</title>
 </svelte:head>
 
-<h1>管理画面</h1>
-{#if admin}
-	<p>管理者 {name}（ID: {id}） でログイン中</p>
-	<Logout />
-{:else if loading}
-	<Loading />
-{:else}
-	<p>管理者専用ページです。管理者アカウントでログインしてください。</p>
-	<Login />
-{/if}
+<header>
+	<h1>管理画面</h1>
+	{#if admin}
+		<p>管理者 {name}（ID: {id}） でログイン中</p>
+		<Logout />
+	{:else if loading}
+		<Loading />
+	{:else}
+		<p>管理者専用ページです。管理者アカウントでログインしてください。</p>
+		<Login />
+	{/if}
+</header>
 
-<article>
-	<h2>都道府県コード</h2>
-	<button type="button" name="updatePrefectureCodes" on:click={apiImportHandler}
-		>RESAS API で上書きする</button
-	>
-	<button type="button" name="openPrefectureCodes" on:click={openEditorHandler}
-		>手動編集画面を開く</button
-	>
-</article>
-<article>
-	<h2>市区町村コード</h2>
-	<button type="button" name="updateCityCodes" on:click={apiImportHandler}
-		>RESAS API で上書きする</button
-	>
-	<button type="button" name="openCityCodes" on:click={openEditorHandler}>手動編集画面を開く</button
-	>
-</article>
+{#if admin}
+	<article>
+		<h2>都道府県コード</h2>
+		<button type="button" name="updatePrefectureCodes" on:click={apiImportHandler}
+			>RESAS API で上書きする</button
+		>
+		<button type="button" name="openPrefectureCodes" on:click={openEditorHandler}
+			>手動編集画面を開く</button
+		>
+	</article>
+	<article>
+		<h2>市区町村コード</h2>
+		<button type="button" name="updateCityCodes" on:click={apiImportHandler}
+			>RESAS API で上書きする</button
+		>
+		<button type="button" name="openCityCodes" on:click={openEditorHandler}
+			>手動編集画面を開く</button
+		>
+	</article>
+{/if}
 
 <style>
 	h1 {
