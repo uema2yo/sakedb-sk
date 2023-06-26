@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { getUserProfile, profile } from "$lib/firebase/userProfile";
 	import { addDocument } from "$lib/firebase/addDocument";
 	import { getDocuments } from "$lib/firebase/getDocuments";
 	import Loading from "$components/Loading.svelte";
 	import EditableFields from "$components/Forms/EditableFields.svelte";
-	import { getGenderList } from "$lib/code/gender";
+	import { getGenderOptions } from "$lib/code/getGenderOptions";
+	import { getPrefectureOptions } from "$lib/code/getPrefectureOptions";
+	import { getCityOptions } from "$lib/code/getCityOptions";
 	import { createEventDispatcher, afterUpdate } from "svelte";
 	import { getDateOffset, getFormatedDate } from "$lib/utility/date";
-  import { GENDER_CODES } from '$src/constants';
+	import { collection } from "firebase/firestore";
 
 	export let uid;
 	let loading = true;
@@ -17,164 +18,202 @@
 		name: { public: true, value: "" },
 		gender: { public: false, value: 0 },
 		birthdate: { public: false, value: "", format: "" },
-		residencePrefecture: { public: false, value: 0 }
+		residencePrefecture: { public: false, value: 0 },
+		residenceCity: { public: false, value: 0 }
 	};
-	let idField, nameField, genderField, birthdateField, residencePrefectureField;
+	let idField, nameField, genderField, birthdateField, residencePrefectureField, residenceCityField;
 	let saving = false;
 	let genderOptions = [];
 	let prefectureOptions = [];
+	let cityOptions = [];
 
 	onMount(async () => {
 		try {
-			GENDER_CODES.map((gender) => {
-				genderOptions.push({ value: gender.code, label: gender.label });
-			});
-			const prefectures = await getDocuments([
-				{
-					name: "b_code_prefecture",
-					order_by: { field: "code", direction: "asc" }
-				}
-			]);
-			prefectures.map((prefecture) => {
-				if (prefecture.code === 13) {
-					prefectureOptions.push({ value: 0, innerText: "----" });
-				}
-				prefectureOptions.push({ value: prefecture.code, innerText: prefecture.label });
-			});
+			genderOptions = getGenderOptions();
+			prefectureOptions = await getPrefectureOptions();
+			cityOptions = await getCityOptions(currentUserProfile.residencePrefecture.value);
+
 			refreshCurrentUserProfile();
-			const { id, name, gender, birthdate, residencePrefecture } = currentUserProfile;
-			idField = {
-				id: "id",
-				collectionName: "b_user_id",
-				fields: [
-					{
-						name: "public",
-						type: "checkbox",
-						value: id.public,
-						disabled: true,
-						label: "公開"
-					},
-					{ name: "value", type: "text", value: id.value }
-				]
-			};
 
-			nameField = {
-				id: "name",
-				collectionName: "b_user_name",
-				fields: [
-					{
-						name: "public",
-						type: "checkbox",
-						value: name.public,
-						disabled: true,
-						label: "公開"
-					},
-					{ name: "value", type: "text", value: name.value }
-				]
-			};
+			const { id, name, gender, birthdate, residencePrefecture, residenceCity } =
+				currentUserProfile;
 
-			genderField = {
-				id: "gender",
-				collectionName: "b_user_gender",
-				fields: [
-					{
-						name: "public",
-						type: "checkbox",
-						value: gender.public,
-						disabled: false,
-						label: "公開"
-					},
-					{
-						name: "value",
-						type: "radio",
-						value: gender.value,
-						group_name: "profile-gender",
-						options: genderOptions
-					}
-				]
-			};
-			birthdateField = {
-				id: "birthdate",
-				collectionName: "b_user_birthdate",
-				fields: [
-					{
-						name: "public",
-						type: "checkbox",
-						value: birthdate.public,
-						disabled: false,
-						label: "公開"
-					},
-					{
-						name: "value",
-						type: "date",
-						value: birthdate.value
-							? getFormatedDate(birthdate.value)
-							: getFormatedDate(getDateOffset("years", 40))
-					}
-				]
-			};
-			residencePrefectureField = {
-				id: "residence_country",
-				collectionName: "b_user_residence_prefecture",
-				fields: [
-					{
-						name: "public",
-						type: "checkbox",
-						value: residencePrefecture.public,
-						disabled: false,
-						label: "公開"
-					},
-					{
-						name: "value",
-						type: "select",
-						value: residencePrefecture.value,
-						options: prefectureOptions
-					}
-				]
-			};
+			setFields();
 		} catch (error) {
 			console.error("ログイン状態の確認中にエラーが発生しました。", error);
 		}
 	});
 
-	async function refreshCurrentUserProfile() {
-		const documents = await getDocuments([
-			{
-				name: "b_user_id",
-				conditions: [{ name: "uid", operator: "==", value: uid }],
-				public_only: false,
-				order_by: { field: "timestamp", direction: "desc" },
-				limit_num: 1
-			},
-			{
-				name: "b_user_name",
-				conditions: [{ name: "uid", operator: "==", value: uid }],
-				public_only: false,
-				order_by: { field: "timestamp", direction: "desc" },
-				limit_num: 1
-			},
-			{
-				name: "b_user_gender",
-				conditions: [{ name: "uid", operator: "==", value: uid }],
-				public_only: false,
-				order_by: { field: "timestamp", direction: "desc" },
-				limit_num: 1
-			},
-			{
-				name: "b_user_birthdate",
-				conditions: [{ name: "uid", operator: "==", value: uid }],
-				public_only: false,
-				order_by: { field: "timestamp", direction: "desc" },
-				limit_num: 1
-			},
-			{
-				name: "b_user_residence_prefecture",
-				conditions: [{ name: "uid", operator: "==", value: uid }],
-				public_only: false,
-				order_by: { field: "timestamp", direction: "desc" },
-				limit_num: 1
+	function setFields() {
+		idField = {
+			id: "id",
+			collectionName: "b_user_id",
+			fields: [
+				{
+					name: "public",
+					type: "checkbox",
+					value: currentUserProfile.id.public,
+					disabled: true,
+					label: "公開"
+				},
+				{ name: "value", type: "text", value: currentUserProfile.id.value }
+			]
+		};
+
+		nameField = {
+			id: "name",
+			collectionName: "b_user_name",
+			fields: [
+				{
+					name: "public",
+					type: "checkbox",
+					value: currentUserProfile.name.public,
+					disabled: true,
+					label: "公開"
+				},
+				{ name: "value", type: "text", value: currentUserProfile.name.value }
+			]
+		};
+
+		genderField = {
+			id: "gender",
+			collectionName: "b_user_gender",
+			fields: [
+				{
+					name: "public",
+					type: "checkbox",
+					value: currentUserProfile.gender.public,
+					disabled: false,
+					label: "公開"
+				},
+				{
+					name: "value",
+					type: "radio",
+					value: currentUserProfile.gender.value,
+					group_name: "profile-gender",
+					options: genderOptions
+				}
+			]
+		};
+		birthdateField = {
+			id: "birthdate",
+			collectionName: "b_user_birthdate",
+			fields: [
+				{
+					name: "public",
+					type: "checkbox",
+					value: currentUserProfile.birthdate.public,
+					disabled: false,
+					label: "公開"
+				},
+				{
+					name: "value",
+					type: "date",
+					value:
+						currentUserProfile.birthdate.value &&
+						getFormatedDate(currentUserProfile.birthdate.value)
+				}
+			]
+		};
+		residencePrefectureField = {
+			id: "residencePrefecture",
+			collectionName: "b_user_residence_prefecture",
+			fields: [
+				{
+					name: "public",
+					type: "checkbox",
+					value: currentUserProfile.residencePrefecture.public,
+					disabled: false,
+					label: "公開"
+				},
+				{
+					name: "value",
+					type: "select",
+					value: currentUserProfile.residencePrefecture.value,
+					options: prefectureOptions
+				}
+			]
+		};
+		residenceCityField = {
+			id: "residenceCity",
+			collectionName: "b_user_residence_city",
+			fields: [
+				{
+					name: "public",
+					type: "checkbox",
+					value: currentUserProfile.residenceCity.public,
+					disabled: false,
+					label: "公開"
+				},
+				{
+					name: "value",
+					type: "select",
+					value: currentUserProfile.residenceCity.value,
+					options: cityOptions
+				}
+			]
+		};
+	}
+	const profileConfig = {
+		id: {
+			collectionName: "b_user_id",
+			conditions: [{ name: "uid", operator: "==", value: uid }],
+			public_only: false,
+			order_by: { field: "timestamp", direction: "desc" },
+			limit_num: 1
+		},
+		name: {
+			collectionName: "b_user_name",
+			conditions: [{ name: "uid", operator: "==", value: uid }],
+			public_only: false,
+			order_by: { field: "timestamp", direction: "desc" },
+			limit_num: 1
+		},
+		gender: {
+			collectionName: "b_user_gender",
+			conditions: [{ name: "uid", operator: "==", value: uid }],
+			public_only: false,
+			order_by: { field: "timestamp", direction: "desc" },
+			limit_num: 1
+		},
+		birthdate: {
+			collectionName: "b_user_birthdate",
+			conditions: [{ name: "uid", operator: "==", value: uid }],
+			public_only: false,
+			order_by: { field: "timestamp", direction: "desc" },
+			limit_num: 1
+		},
+		residencePrefecture: {
+			collectionName: "b_user_residence_prefecture",
+			conditions: [{ name: "uid", operator: "==", value: uid }],
+			public_only: false,
+			order_by: { field: "timestamp", direction: "desc" },
+			limit_num: 1
+		},
+		residenceCity: {
+			collectionName: "b_user_residence_city",
+			conditions: [{ name: "uid", operator: "==", value: uid }],
+			public_only: false,
+			order_by: { field: "timestamp", direction: "desc" },
+			limit_num: 1
+		}
+	};
+
+	let document = {};
+
+	async function refreshCurrentUserProfile(configName) {
+		//const { id, name, gender, birthdate, residencePrefecture, residenceCity } = profileConfig;
+		let res;
+
+		if (configName && configName !== "") {
+			res = await getDocuments([profileConfig[configName]]);
+			document[configName] = res[0];
+		} else {
+			for (const [name, config] of Object.entries(profileConfig)) {
+				res = await getDocuments([config]);
+				document[name] = res[0];
 			}
-		]);
+		}
 
 		function getCurrentUserProfile(doc, alt) {
 			return {
@@ -185,18 +224,31 @@
 
 		const userAltName = "user";
 
-		currentUserProfile.id = getCurrentUserProfile(documents[0], userAltName);
-		currentUserProfile.name = getCurrentUserProfile(documents[1], "名無し");
-		currentUserProfile.gender = getCurrentUserProfile(documents[2], 0);
-		currentUserProfile.birthdate = getCurrentUserProfile(documents[3], null);
-		currentUserProfile.residencePrefecture = getCurrentUserProfile(documents[4], 0);
-		currentUserProfile.gender.format = genderOptions.find(
+		currentUserProfile.id = getCurrentUserProfile(document.id, userAltName);
+		currentUserProfile.name = getCurrentUserProfile(document.name, "名無し");
+		currentUserProfile.gender = getCurrentUserProfile(document.gender, 0);
+		currentUserProfile.birthdate = getCurrentUserProfile(
+			document.birthdate,
+			getFormatedDate(getDateOffset("years", 30))
+		);
+		currentUserProfile.residencePrefecture = getCurrentUserProfile(document.residencePrefecture, 0);
+		currentUserProfile.residenceCity = getCurrentUserProfile(document.residenceCity, 0);
+		const currentUserGenderFormat = genderOptions.find(
 			(genderOption) => genderOption.value === currentUserProfile.gender.value
-		).label;
+		);
+		currentUserProfile.gender.format = currentUserGenderFormat && currentUserGenderFormat.label;
 		currentUserProfile.birthdate.format = getFormatedDate(currentUserProfile.birthdate.value, "ja");
-		currentUserProfile.residencePrefecture.format = prefectureOptions.find(
+
+		const residencePrefectureFormat = prefectureOptions.find(
 			(prefectureOption) => prefectureOption.value === currentUserProfile.residencePrefecture.value
-		).innerText;
+		);
+		currentUserProfile.residencePrefecture.format =
+			residencePrefectureFormat && residencePrefectureFormat.innerText;
+		const residenceCityFormat = cityOptions.find(
+			(cityOption) => cityOption.value === currentUserProfile.residenceCity.value
+		);
+		currentUserProfile.residenceCity.format = residenceCityFormat && residenceCityFormat.innerText;
+
 		loading = false;
 	}
 
@@ -211,8 +263,7 @@
 		addDocument(ev.detail.field.collectionName, document)
 			.then(() => {
 				currentUserProfile[ev.detail.field.id] = document;
-				refreshCurrentUserProfile();
-				//refreshLabel();
+				refreshCurrentUserProfile(ev.detail.field.id);
 				saving = false;
 			})
 			.catch((error) => {
@@ -230,28 +281,52 @@
 			<h2>{currentUserProfile.name.value}（{currentUserProfile.id.value}）さんのプロフィール</h2>
 			<section>
 				<h3>ユーザーID</h3>
-				<EditableFields field={idField} isPublic isUserLoggedIn on:save={handleSave}>
+				<EditableFields
+					field={idField}
+					isPublic
+					isUserLoggedIn
+					on:save={handleSave}
+					on:startEditing={setFields}
+				>
 					<span>{currentUserProfile.id.public ? "公開" : "非公開"}</span>{currentUserProfile.id
 						.value}
 				</EditableFields>
 			</section>
 			<section>
 				<h3>名前</h3>
-				<EditableFields field={nameField} isPublic isUserLoggedIn on:save={handleSave}>
+				<EditableFields
+					field={nameField}
+					isPublic
+					isUserLoggedIn
+					on:save={handleSave}
+					on:startEditing={setFields}
+				>
 					<span>{currentUserProfile.name.public ? "公開" : "非公開"}</span>{currentUserProfile.name
 						.value}
 				</EditableFields>
 			</section>
 			<section>
 				<h3>性自認</h3>
-				<EditableFields field={genderField} isPublic isUserLoggedIn on:save={handleSave}>
+				<EditableFields
+					field={genderField}
+					isPublic
+					isUserLoggedIn
+					on:save={handleSave}
+					on:startEditing={setFields}
+				>
 					<span>{currentUserProfile.gender.public ? "公開" : "非公開"}</span>{currentUserProfile
 						.gender.format}
 				</EditableFields>
 			</section>
 			<section>
 				<h3>生年月日</h3>
-				<EditableFields field={birthdateField} isPublic isUserLoggedIn on:save={handleSave}>
+				<EditableFields
+					field={birthdateField}
+					isPublic
+					isUserLoggedIn
+					on:save={handleSave}
+					on:startEditing={setFields}
+				>
 					<span>{currentUserProfile.birthdate.public ? "公開" : "非公開"}</span>{currentUserProfile
 						.birthdate.value
 						? currentUserProfile.birthdate.format
@@ -265,9 +340,20 @@
 					isPublic
 					isUserLoggedIn
 					on:save={handleSave}
+					on:startEditing={setFields}
 				>
 					<span>{currentUserProfile.residencePrefecture.public ? "公開" : "非公開"}</span
 					>{currentUserProfile.residencePrefecture.format}
+				</EditableFields>
+				<EditableFields
+					field={residenceCityField}
+					isPublic
+					isUserLoggedIn
+					on:save={handleSave}
+					on:startEditing={setFields}
+				>
+					<span>{currentUserProfile.residenceCity.public ? "公開" : "非公開"}</span
+					>{currentUserProfile.residenceCity.format}
 				</EditableFields>
 			</section>
 		</article>

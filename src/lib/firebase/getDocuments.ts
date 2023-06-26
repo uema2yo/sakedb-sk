@@ -21,7 +21,7 @@ interface Condition {
 }
 
 interface CollectionConfig {
-  name: string;
+  collectionName: string;
   conditions?: Condition[];
   public_only?: boolean;
   order_by?: {
@@ -32,12 +32,12 @@ interface CollectionConfig {
 }
 
 export async function getDocuments(
-  collections: CollectionConfig[]
+  configs: CollectionConfig[]
 ): Promise<DocumentData[]> {
   try {
-    const promises = collections.map(async (config) => {
-      const { name, conditions, public_only, order_by, limit_num } = config;
-      const collectionRef = collection(db, name);
+    const promises = configs.map(async (config) => {
+      const { collectionName, conditions, public_only, order_by, limit_num } = config;
+      const collectionRef = collection(db, collectionName);
       let q = query(collectionRef);
       if (conditions && conditions.length > 0) {
         q = query(

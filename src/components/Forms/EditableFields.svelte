@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import { createEventDispatcher, afterUpdate } from "svelte";
 
 	export let field = {};
@@ -13,8 +14,12 @@
 	let value;
 	let inputElements = [];
 
-	function startEditing() {
-		console.log("start editing");
+	onMount(async () => {
+	});
+
+	async function startEditing(ev) {
+		await dispatch("startEditing");
+		editedFields = JSON.parse(JSON.stringify(field.fields));
 		isEditing = true;
 		isCompositionInProgress = false;
 		inputElements = field.fields.map(() => ({}));
@@ -28,7 +33,7 @@
 		if (isCompositionInProgress) return;
 		field.fields = JSON.parse(JSON.stringify(editedFields));
 		field.fields.find((obj) => {
-			if(obj.type === "date") {
+			if (obj.type === "date") {
 				obj.value = new Date(obj.value).getTime();
 			}
 		});
@@ -91,10 +96,12 @@
 					name={fieldData.selectName}
 					bind:this={inputElements[i]}
 					bind:value={editedFields[i].value}
-					on:change={fieldData.onchange ? () =>
-						fieldData.onchange({
-							target: { name: fieldData.selectName, value: inputElements[i].value }
-						}) : null}
+					on:change={fieldData.onchange
+						? () =>
+								fieldData.onchange({
+									target: { name: fieldData.selectName, value: inputElements[i].value }
+								})
+						: null}
 				>
 					{#each fieldData.options as option}
 						<option value={option.value}>{option.innerText}</option>

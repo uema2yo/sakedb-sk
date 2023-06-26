@@ -27,14 +27,14 @@
 			console.log(login);
 			const documents = await getDocuments([
 				{
-					name: "b_user_id",
+					collectionName: "b_user_id",
 					conditions: [{ name: "uid", operator: "==", value: uid }],
 					public_only: false,
 					order_by: { field: "timestamp", direction: "desc" },
 					limit_num: 1
 				},
 				{
-					name: "b_user_name",
+					collectionName: "b_user_name",
 					conditions: [{ name: "uid", operator: "==", value: uid }],
 					public_only: false,
 					order_by: { field: "timestamp", direction: "desc" },
