@@ -31,9 +31,9 @@
 		try {
 			genderOptions = getGenderOptions();
 			prefectureOptions = await getPrefectureOptions();
-			cityOptions = await getCityOptions(currentUserProfile.residencePrefecture.value);
-
-			refreshCurrentUserProfile();
+			refreshCurrentUserProfile().then(async () => {
+				cityOptions = await getCityOptions(currentUserProfile.residencePrefecture.value);
+			});
 
 			const { id, name, gender, birthdate, residencePrefecture, residenceCity } =
 				currentUserProfile;
@@ -44,7 +44,7 @@
 		}
 	});
 
-	function setFields() {
+	async function setFields() {
 		idField = {
 			id: "id",
 			collectionName: "b_user_id",
@@ -244,6 +244,8 @@
 		);
 		currentUserProfile.residencePrefecture.format =
 			residencePrefectureFormat && residencePrefectureFormat.innerText;
+
+		cityOptions = await getCityOptions(currentUserProfile.residencePrefecture.value);
 		const residenceCityFormat = cityOptions.find(
 			(cityOption) => cityOption.value === currentUserProfile.residenceCity.value
 		);
@@ -261,9 +263,13 @@
 			document[name] = value;
 		});
 		addDocument(ev.detail.field.collectionName, document)
-			.then(() => {
+			.then(async () => {
 				currentUserProfile[ev.detail.field.id] = document;
 				refreshCurrentUserProfile(ev.detail.field.id);
+				if (ev.detail.field.id === "residencePrefecture") {
+					cityOptions = await getCityOptions(currentUserProfile.residencePrefecture.value);
+					currentUserProfile.residenceCity.value = 0;
+				}
 				saving = false;
 			})
 			.catch((error) => {
