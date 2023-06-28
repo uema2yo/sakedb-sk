@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/public";
-import { setDocuments } from "$lib/firebase/setDocuments";
+import { updateCodes } from "$lib/code/updateCodes";
 
 const headers = {
 	headers: {
@@ -29,17 +29,17 @@ export async function updateCityCodes() {
 			const resCityApi = await getCityApi(prefecture.prefCode);
 			const resCityApiResults = resCityApi.result;
 			let cityCodes = [];
-			resCityApiResults.forEach((city) => {
-				if (city.bigCityFlag !== "2") {
+			resCityApiResults.forEach((r: { bigCityFlag: string; cityCode: number; cityName: string; prefCode: number; }) => {
+				if (r.bigCityFlag !== "2") {
 					cityCodes.push({
-						code: city.cityCode,
-						label: city.cityName,
-						prefCode: city.prefCode,
-						bigCityFlag: city.bigCityFlag
+						code: r.cityCode,
+						label: r.cityName,
+						prefCode: r.prefCode,
+						bigCityFlag: r.bigCityFlag
 					});
 				}
 			});
-			setDocuments("b_code_city", cityCodes);
+			updateCodes("b_code_city", cityCodes);
 			cityCodes = [];
 		});
 

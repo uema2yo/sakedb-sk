@@ -5,7 +5,9 @@
 	import { onMount } from "svelte";
 	import { getDocuments } from "$lib/firebase/getDocuments";
 	import { checkLogin, login } from "$lib/checkLogin";
-	import { SITE_TITLE, SUB_TITLE } from "../../constants";
+	import { SITE_TITLE, SUB_TITLE } from "$src/constants";
+	import { updateRegionCodes } from "$lib/code/updateRegionCodes";
+	import { updateCountryCodes } from "$lib/code/updateCountryCodes";
 	import { updatePrefectureCodes } from "$lib/code/updatePrefectureCodes";
 	import { updateCityCodes } from "$lib/code/updateCityCodes";
 	import Head from "$components/Head.svelte";
@@ -48,8 +50,14 @@
 			console.error("Failed to check login:", error);
 		}
 	});
-	function apiImportHandler(ev) {
+	async function apiImportHandler(ev) {
 		switch (ev.target.name) {
+			case "updateRegionCodes":
+				await updateRegionCodes();
+				break;
+			case "updateCountryCodes":
+				await updateCountryCodes();
+				break;
 			case "updatePrefectureCodes":
 				updatePrefectureCodes();
 				break;
@@ -83,11 +91,29 @@
 
 {#if admin}
 	<article>
+		<h2>地域コード</h2>
+		<button type="button" name="updateRegionCodes" on:click={apiImportHandler}
+			>RESAS API で上書きする</button
+		>
+		<button type="button" name="openRegionCodes" on:click={openEditorHandler} disabled={true}
+			>手動編集画面を開く</button
+		>
+	</article>
+	<article>
+		<h2>国コード</h2>
+		<button type="button" name="updateCountryCodes" on:click={apiImportHandler}
+			>RESAS API で上書きする</button
+		>
+		<button type="button" name="openCountryCodes" on:click={openEditorHandler} disabled={true}
+			>手動編集画面を開く</button
+		>
+	</article>
+	<article>
 		<h2>都道府県コード</h2>
 		<button type="button" name="updatePrefectureCodes" on:click={apiImportHandler}
 			>RESAS API で上書きする</button
 		>
-		<button type="button" name="openPrefectureCodes" on:click={openEditorHandler}
+		<button type="button" name="openPrefectureCodes" on:click={openEditorHandler} disabled={true}
 			>手動編集画面を開く</button
 		>
 	</article>
@@ -96,7 +122,7 @@
 		<button type="button" name="updateCityCodes" on:click={apiImportHandler}
 			>RESAS API で上書きする</button
 		>
-		<button type="button" name="openCityCodes" on:click={openEditorHandler}
+		<button type="button" name="openCityCodes" on:click={openEditorHandler} disabled={true}
 			>手動編集画面を開く</button
 		>
 	</article>

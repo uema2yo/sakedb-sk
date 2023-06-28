@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/public";
-import { setDocuments } from "$lib/firebase/setDocuments";
+import { updateCodes } from "$lib/code/updateCodes";
 
 export async function updatePrefectureCodes() {
 	try {
@@ -13,11 +13,11 @@ export async function updatePrefectureCodes() {
 
 		const res = await prefecture.json();
 
-		res.result.forEach((r) => {
+		res.result.forEach((r: { prefCode: number; prefName: string; }) => {
 			prefectureCodes.push({ code: r.prefCode, label: r.prefName });
 		});
 
-		setDocuments("b_code_prefecture", prefectureCodes);
+		updateCodes("b_code_prefecture", prefectureCodes);
 	} catch (error) {
 		console.error("都道府県一覧データ API の読み込みに失敗しました。");
 	}
